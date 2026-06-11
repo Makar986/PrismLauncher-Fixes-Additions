@@ -1044,11 +1044,15 @@ std::optional<ModPlatform::ModLoaderTypes> PackProfile::getSupportedModLoaders()
     if (!loadersOpt.has_value())
         return loadersOpt;
     auto loaders = loadersOpt.value();
-    // TODO: remove this or add version condition once Quilt drops official Fabric support
+
     if (loaders & ModPlatform::Quilt)
         loaders |= ModPlatform::Fabric;
     if (getComponentVersion("net.minecraft") == "1.20.1" && (loaders & ModPlatform::NeoForge))
         loaders |= ModPlatform::Forge;
+
+    if (loaders & ModPlatform::BTA) {
+    }
+
     return loaders;
 }
 
@@ -1069,5 +1073,10 @@ QList<ModPlatform::ModLoaderType> PackProfile::getModLoadersList()
         !result.contains(ModPlatform::Forge)) {
         result.append(ModPlatform::Forge);
     }
+
+    if (result.contains(ModPlatform::BTA)) {
+        result.append(ModPlatform::BTA);
+    }
+
     return result;
 }
