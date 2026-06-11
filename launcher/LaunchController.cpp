@@ -128,7 +128,18 @@ void LaunchController::decideAccount()
 
 LaunchDecision LaunchController::decideLaunchMode()
 {
-    if (!m_accountToUse || m_wantedLaunchMode == LaunchMode::Demo) {
+    if (!m_accountToUse) {
+        m_actualLaunchMode = LaunchMode::Demo;
+        return LaunchDecision::Continue;
+    }
+
+    // Если тип аккаунта — Offline (пиратка), сразу разрешаем полноценный офлайн-режим, минуя демо
+    if (m_accountToUse->accountType() == AccountType::Offline) {
+        m_actualLaunchMode = LaunchMode::Offline;
+        return LaunchDecision::Continue;
+    }
+
+    if (m_wantedLaunchMode == LaunchMode::Demo) {
         m_actualLaunchMode = LaunchMode::Demo;
         return LaunchDecision::Continue;
     }
@@ -167,9 +178,6 @@ LaunchDecision LaunchController::decideLaunchMode()
         ProgressDialog progDialog(m_parentWidget);
         progDialog.setSkipButton(true, tr("Abort"));
 
-        // TODO: this relies on tasks' synchronous signal dispatching nature
-        // TODO: meaning currentTask can't complete and become null while this code is running
-        // TODO: this code will produce a race condition when tasks become fully async
         auto task = accountToCheck->currentTask();
         progDialog.execWithTask(task.get());
 
